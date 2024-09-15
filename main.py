@@ -1,25 +1,134 @@
 import sfsutils
 import os
+import sys
 path = open("path.txt", "r").readline()
 savelist = os.listdir(path)
+options = ["Rename","Edit Stupidity","Edit Courage","Edit Badass","Edit Vetran","Edit Gender","Edit Trait","Exit"]
+tf = ["False", "True"]
+mf = ["Male","Female"]
+traits = ["Pilot","Engineer","Scientist"]
 for i in savelist:
     print("["+str(savelist.index(i))+"]"+i)
-save = int(input("Enter the number of the save you want to edit. >>>"))
-data = sfsutils.parse_savefile(path+savelist[save]+"/persistent.sfs")
+try:
+    save = int(input("Enter the number of the save you want to edit. >>>"))
+except ValueError:
+    print("Error: Value entered is not a number")
+    input("Press enter to exit")
+    sys.exit()
+try:
+    data = sfsutils.parse_savefile(path+savelist[save]+"/persistent.sfs")
+except IndexError:
+    print("Error: Save entered is out of lists range")
+    input("Press enter to exit")
+    sys.exit()
+#name choicer
+print()
+names = [guy['name'] for guy in data['GAME']['ROSTER']['KERBAL']]
+for i in names:
+    print("["+str(names.index(i))+"]"+i)
+try:
+    kerbNum = int(input("Enter the number of the kerbal you want to edit >>>"))
+except ValueError:
+    print("Error: Value entered is not a number")
+    input("Press enter to exit")
+    sys.exit()
+try:
+    kerb = names[kerbNum]
+except IndexError:
+    print("Error: Kerbal entered is out of lists range")
+    input("Press enter to exit")
+    sys.exit()
 
 def rename(data, oldname, newname):
+    global names
     names = [guy['name'] for guy in data['GAME']['ROSTER']['KERBAL']]
     try:
         idx = names.index(oldname)
     except ValueError:
         print("Kerbal '%s' does not exist" % oldname)
-        return
+        input("Press enter to exit")
+        sys.exit()
     data['GAME']['ROSTER']['KERBAL'][idx]['name'] = newname
 
-old = input("Enter the curent name of the kerbal >>>")
-new = input("Enter the new name of the kerbal >>>")
-rename(data,old,new)
-sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
+def revalue(data, value, newvalue):
+    data['GAME']['ROSTER']['KERBAL'][kerbNum][value] = newvalue
 
-input("Done! Press enter to close.")
-exit()
+def renameSeq():
+    global names
+    global kerb
+    new = input("Enter the new name of the kerbal >>>")
+    rename(data,kerb,new)
+    sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
+    names = [guy['name'] for guy in data['GAME']['ROSTER']['KERBAL']]
+    kerb = names[kerbNum]
+    optionSeq()
+
+def stupidSeq():
+    revalue(data,"dumb",input("Enter a decimal number from 0 to 1 for the stupidity value >>>"))
+    sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
+    optionSeq()
+
+def courageSeq():
+    revalue(data,"brave",input("Enter a decimal number from 0 to 1 for the courage value >>>"))
+    sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
+    optionSeq()
+
+def badassSeq():
+    revalue(data,"badS",tf[int(input("Enter 0 to set Badass to false enter, 1 to set it to true >>>"))])
+    sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
+    optionSeq()
+
+def veteranSeq():
+    revalue(data,"veteran",tf[int(input("Enter 0 to set veteran to false, enter 1 to set it to true >>>"))])
+    sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
+    optionSeq()
+
+def genderSeq():
+    revalue(data,"gender",mf[int(input("Enter 0 to set gender to male, enter 1 to set it to female >>>"))])
+    sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
+    optionSeq()
+
+def traitSeq():
+    revalue(data,"trait",traits[int(input("Enter 0 to set trait to pilot, enter 1 to set it to engineer, enter 2 to set it to scientist >>>"))])
+    sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
+    optionSeq()
+
+def exitSeq():
+    sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
+    input("Done! Press enter to close.")
+    sys.exit()
+
+def optionSeq():
+    for i in options:
+        print("["+str(options.index(i))+"]"+i)
+    optionChoice = int(input("Enter the option you want to edit >>>"))
+    match optionChoice:
+        case 0:
+            renameSeq()
+        case 1:
+            #edit stupid
+            stupidSeq()
+        case 2:
+            #edit corage
+            courageSeq()
+        case 3:
+            #edit badS
+            badassSeq()
+        case 4:
+            #edit vetran
+            veteranSeq()
+        case 5:
+            #edit gender
+            genderSeq()
+        case 6:
+            #edit trait
+            traitSeq()
+        case 7:
+            exitSeq()
+        case _:
+            optionSeq()
+    
+
+
+
+optionSeq()

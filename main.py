@@ -3,9 +3,10 @@ import os
 import sys
 path = open("path.txt", "r").readline()
 savelist = os.listdir(path)
-options = ["Rename","Edit Stupidity","Edit Courage","Edit Badass","Edit Vetran","Edit Gender","Edit Trait","Exit"]
+options = ["Rename","Edit Stupidity","Edit Courage","Edit Badass","Edit Veteran","Edit Gender","Edit Trait","Delete Kerbal","Exit"]
 tf = ["False", "True"]
 mf = ["Male","Female"]
+ny = ["n","y"]
 traits = ["Pilot","Engineer","Scientist"]
 for i in savelist:
     print("["+str(savelist.index(i))+"]"+i)
@@ -50,6 +51,9 @@ def rename(data, oldname, newname):
         sys.exit()
     data['GAME']['ROSTER']['KERBAL'][idx]['name'] = newname
 
+def remove(data):
+    data['GAME']['ROSTER']['KERBAL'].pop(kerbNum)
+
 def revalue(data, value, newvalue):
     data['GAME']['ROSTER']['KERBAL'][kerbNum][value] = newvalue
 
@@ -93,6 +97,19 @@ def traitSeq():
     sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
     optionSeq()
 
+def removeSeq():
+    print("!WARNING! This will delete the kerbal entirely, this change is irreverisble")
+    match input("Do you wish to continue? (y/n) >>>"):
+        case "n":
+            print("Kerbal not deleted")
+            optionSeq()
+        case "y":
+            print("Kerbal has been deleted")
+        case _:
+            removeSeq()
+    remove(data)
+    exitSeq()
+
 def exitSeq():
     sfsutils.writeout_savefile(data, destination_file=path+savelist[save]+"/persistent.sfs")
     input("Done! Press enter to close.")
@@ -124,6 +141,8 @@ def optionSeq():
             #edit trait
             traitSeq()
         case 7:
+            removeSeq()
+        case 8:
             exitSeq()
         case _:
             optionSeq()

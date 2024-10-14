@@ -17,7 +17,7 @@ except ValueError:
     input("Press enter to exit")
     sys.exit()
 try:
-    data = sfsutils.parse_savefile(path+savelist[save]+"/persistent.sfs")
+    data = sfsutils.parse_savefile(path+"/"+savelist[save]+"/persistent.sfs")
 except IndexError:
     print("Error: Save entered is out of lists range")
     input("Press enter to exit")
